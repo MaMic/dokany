@@ -1,5 +1,6 @@
 # Dokany
 [![Build status](https://ci.appveyor.com/api/projects/status/4tpt4v8btyahh3le/branch/master?svg=true)](https://ci.appveyor.com/project/Maxhy/dokany/branch/master)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/6789/badge.svg)](https://scan.coverity.com/projects/6789)
 [![Bounty](https://img.shields.io/bountysource/team/dokan-dev/activity.svg)](https://www.bountysource.com/teams/dokan-dev/issues)
 
 ## What is Dokan
@@ -39,6 +40,7 @@ You can obtain source files from https://dokan-dev.github.io
 
 ## Environment
 Dokan works on
+ * Windows 10
  * Windows 8.1
  * Windows Server 2012 R2
  * Windows 8
@@ -75,7 +77,7 @@ easy to debug.
 To learn more about Dokan file system development, see the [API documentation](https://github.com/dokan-dev/dokany/wiki/API).
 
 ## Build
-In short, download and install the [Visual Studio 2013 with WDK 8.1 Update](https://msdn.microsoft.com/en-us/windows/hardware/gg454513.aspx)
+In short, download and install the [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with [SDK 10](https://dev.windows.com/en-us/downloads/windows-10-sdk) & [WDK 10](https://msdn.microsoft.com/en-us/windows/hardware/dn913721.aspx)
 
 For details, see the [build page](https://github.com/dokan-dev/dokany/wiki/Build).
 

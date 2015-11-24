@@ -39,10 +39,12 @@ UninstPage instfiles
 	
 	File ..\dokan\dokan.h
 	File ..\dokan\fileinfo.h
+	File ..\sys\public.h
 	
   SetOutPath ${folder}\Dokan\DokanLibrary\lib
   
 	File ..\${arch}\Release\dokan.lib
+	File ..\${arch}\Release\dokanfuse.lib
     File ..\${arch}\Release\dokanfuse.lib
 
   SetOutPath ${folder}\Dokan\DokanLibrary\sample\mirror
@@ -62,6 +64,7 @@ UninstPage instfiles
   SetOutPath $SYSDIR
 
     File ..\${arch}\Release\dokan.dll
+	File ..\${arch}\Release\dokanfuse.dll
     File ..\${arch}\Release\dokannp.dll
 
   ${If} ${arch} == "x64"
@@ -88,8 +91,8 @@ UninstPage instfiles
 !macroend
 
 !macro DokanSetup
-  ExecWait '"$PROGRAMFILES32\Dokan\DokanLibrary\dokanctl.exe" /i a' $0
-  ExecWait '"$PROGRAMFILES32\Dokan\DokanLibrary\dokanctl.exe" /i n' $0
+    ExecWait '"$PROGRAMFILES32\Dokan\DokanLibrary\dokanctl.exe" /i a' $0
+	ExecWait '"$PROGRAMFILES32\Dokan\DokanLibrary\dokanctl.exe" /i n' $0
   DetailPrint "dokanctl returned $0"
   WriteUninstaller $PROGRAMFILES32\Dokan\DokanLibrary\DokanUninstall.exe
 
@@ -121,24 +124,24 @@ UninstPage instfiles
 !macroend
 
 Section -Prerequisites
-  ; Check VC++ 2013 is installed on the system
+  ; Check VC++ 2015s is installed on the system
   
   SetOutPath "$INSTDIR"
   
   IfSilent endVCRedist
   ${If} ${RunningX64}
 	SetRegView 32
-	ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{13A4EE12-23EA-3371-91EE-EFB36DDFFF3E}" "Version"
+	ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A2563E55-3BEC-3828-8D67-E5E8B9E8B675}" "Version"
 	${If} $0 == ""
 		Goto beginVCRedist_x86
 	${EndIf}
 	SetRegView 64
-	ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A749D8E6-B613-3BE3-8F5F-045C84EBA29B}" "Version"
+	ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{0D3E9E15-DE7A-300B-96F1-B4AF12B96488}" "Version"
 	${If} $0 == ""
 		Goto beginVCRedist_x64
 	${EndIf}
   ${Else}
-	ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{13A4EE12-23EA-3371-91EE-EFB36DDFFF3E}" "Version"
+	ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A2563E55-3BEC-3828-8D67-E5E8B9E8B675}" "Version"
 	${If} $0 == ""
 		Goto beginVCRedist_x86
 	${EndIf}
@@ -156,7 +159,7 @@ Section -Prerequisites
 	  ${EndIf}
   !else
 	beginVCRedist_x64:
-	MessageBox MB_YESNO "Your system does not appear to have Microsoft Visual C++ 2013 Runtime installed.$\n$\nWould you like to download it?" IDNO endVCRedist
+	MessageBox MB_YESNO "Your system does not appear to have Microsoft Visual C++ 2015 Runtime installed.$\n$\nWould you like to download it?" IDNO endVCRedist
 	ExecShell "open" "https://www.microsoft.com/en-US/download/details.aspx?id=40784"
 	Abort
   !endif
@@ -185,6 +188,8 @@ Section "Dokan PDB x86" section_x86_pdb
     !insertmacro PDBFiles "Win8.1" "Win32" $PROGRAMFILES32
   ${ElseIf} ${IsWin2012R2}
     !insertmacro PDBFiles "Win8.1" "Win32" $PROGRAMFILES32
+  ${ElseIf} ${IsWin10}
+    !insertmacro PDBFiles "Win10" "Win32" $PROGRAMFILES32
   ${EndIf}
 SectionEnd
 
@@ -201,6 +206,8 @@ Section "Dokan PDB x64" section_x64_pdb
     !insertmacro PDBFiles "Win8.1" "x64" $PROGRAMFILES64
   ${ElseIf} ${IsWin2012R2}
     !insertmacro PDBFiles "Win8.1" "x64" $PROGRAMFILES64
+  ${ElseIf} ${IsWin10}
+    !insertmacro PDBFiles "Win10" "x64" $PROGRAMFILES64
   ${EndIf}
 SectionEnd
 
@@ -217,6 +224,8 @@ Section "Dokan Driver x86" section_x86_driver
     !insertmacro Driver "Win8.1" "Win32"
   ${ElseIf} ${IsWin2012R2}
     !insertmacro Driver "Win8.1" "Win32"
+  ${ElseIf} ${IsWin10}
+    !insertmacro Driver "Win10" "Win32"
   ${EndIf}
   !insertmacro DokanSetup
 SectionEnd
@@ -234,6 +243,8 @@ Section "Dokan Driver x64" section_x64_driver
     !insertmacro Driver "Win8.1" "x64"
   ${ElseIf} ${IsWin2012R2}
     !insertmacro Driver "Win8.1" "x64"
+  ${ElseIf} ${IsWin10}
+    !insertmacro Driver "Win10" "x64"
   ${EndIf}
   !insertmacro DokanSetup
 SectionEnd
@@ -246,6 +257,7 @@ Section "Uninstall"
   RMDir /r $PROGRAMFILES32\Dokan\DokanLibrary
   RMDir $PROGRAMFILES32\Dokan
   Delete $SYSDIR\dokan.dll
+  Delete $SYSDIR\dokanfuse.dll
   Delete $SYSDIR\dokannp.dll
 
   ${If} ${RunningX64}
@@ -254,6 +266,7 @@ Section "Uninstall"
     ${DisableX64FSRedirection}
       Delete /REBOOTOK $SYSDIR\drivers\dokan.sys
       Delete $SYSDIR\dokan.dll
+	  Delete $SYSDIR\dokanfuse.dll
       Delete $SYSDIR\dokannp.dll
     ${EnableX64FSRedirection}
   ${Else}
@@ -304,8 +317,9 @@ Function .onInit
 	${ElseIf} ${IsWin8}
 	${ElseIf} ${IsWin2012R2}
 	${ElseIf} ${IsWin8.1}
+	${ElseIf} ${IsWin10}
     ${Else}
-      MessageBox MB_OK "Your OS is not supported. Dokan library supports Windows 2008R2, 7, 2012, 8, 2012R2, 8.1 for x64."
+      MessageBox MB_OK "Your OS is not supported. Dokan library supports Windows 2008R2, 7, 2012, 8, 2012R2, 8.1, 10 for x64."
       Abort
     ${EndIf}
   ${Else}
@@ -315,8 +329,9 @@ Function .onInit
 	${ElseIf} ${IsWin8}
 	${ElseIf} ${IsWin2012R2}
 	${ElseIf} ${IsWin8.1}
+	${ElseIf} ${IsWin10}
     ${Else}
-      MessageBox MB_OK "Your OS is not supported. Dokan library supports Windows 2008R2, 7, 2012, 8, 2012R2, 8.1 for x86."
+      MessageBox MB_OK "Your OS is not supported. Dokan library supports Windows 2008R2, 7, 2012, 8, 2012R2, 8.1, 10 for x86."
       Abort
     ${EndIf}
   ${EndIf}
@@ -327,14 +342,14 @@ Function .onInit
       IfFileExists $SYSDIR\drivers\dokan.sys HasPreviousVersionX64 NoPreviousVersionX64
       ; To make EnableX64FSRedirection called in both cases, needs duplicated MessageBox code. How can I avoid this?
       HasPreviousVersionX64:
-        MessageBox MB_OK "Please unstall the previous version and restart your computer before running this installer."
+        MessageBox MB_OK "Please uninstall the previous version and restart your computer before running this installer."
         Abort
       NoPreviousVersionX64:
     ${EnableX64FSRedirection}
   ${Else}
     IfFileExists $SYSDIR\drivers\dokan.sys HasPreviousVersion NoPreviousVersion
     HasPreviousVersion:
-      MessageBox MB_OK "Please unstall the previous version and restart your computer before running this installer."
+      MessageBox MB_OK "Please uninstall the previous version and restart your computer before running this installer."
       Abort
     NoPreviousVersion:
   ${EndIf}

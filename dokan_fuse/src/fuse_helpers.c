@@ -112,7 +112,8 @@ case FUSE_OPT_KEY_NONOPT:
 			fprintf(stderr, "fuse: bad mount point `%s': %s\n", arg, strerror(errno));
 			return -1;
 		}*/
-		strcpy(mountpoint,arg);
+		ZeroMemory(mountpoint, sizeof(mountpoint));
+		strncpy(mountpoint,arg, sizeof(mountpoint) - 1);
 		return fuse_opt_add_opt(&hopts->mountpoint, mountpoint);
 	} else {
 		fprintf(stderr, "fuse: invalid argument `%s'\n", arg);
@@ -181,10 +182,8 @@ int fuse_daemonize(int foreground)
 {
 	/** No daemons on Windows */
 #ifdef __CYGWIN__
-	int res;
-
 	if (!foreground) {
-		res = daemon(0, 0);
+		int res = daemon(0, 0);
 		if (res == -1) {
 			perror("fuse: failed to daemonize program\n");
 			return -1;
